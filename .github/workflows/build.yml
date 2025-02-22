@@ -1,8 +1,7 @@
 name: Build
 on:
   push:
-    branches-ignore:
-      - 'main'
+
 env:
   POETRY_VERSION: 1.8.4
 

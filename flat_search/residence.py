@@ -10,12 +10,13 @@ from bs4 import BeautifulSoup
 Html = str
 PropertyType = Literal["flat"]
 Residence = dict[any, any]
+Unit = str
 
 RIGHT_MOVE_URL = "https://www.rightmove.co.uk/property-for-sale/find.html"
 
 
 @dataclass
-class ResidentFilter:
+class ResidentFilter:  # pylint: disable=too-many-instance-attributes
     """Rightmove filter options including client side filters"""
 
     locationIdentifier: str  # pylint: disable=invalid-name
@@ -25,6 +26,7 @@ class ResidentFilter:
     radius: float
     min_bathrooms: int
     min_size: int
+    exclusion_list: set[int]
 
 
 def get_residences(
@@ -38,15 +40,21 @@ def get_residences(
     """
 
     params = _get_server_params(residence_filter)
-
     params["index"] = 0
+
+    ids = set()
     while True:
         r = requests.get(url=url, params=params, timeout=2)
         max_count, residences = _get_residence_objects(r.text)
 
         for residence in residences:
             if not residence_filter or _valid_residence(residence, residence_filter):
-                yield residence
+
+                residence_id = get_id(residence)
+
+                if residence_id not in ids:
+                    yield residence
+                    ids.add(get_id(residence))
 
             params["index"] += 1
 
@@ -67,11 +75,15 @@ def _get_residence_objects(page: Html) -> tuple[int, list[dict[any, any]]]:
 
 def _valid_residence(residence: dict[any, any], residence_filter: ResidentFilter):
     return (
-        not get_bathroom_count(residence)
-        or get_bathroom_count(residence) >= residence_filter.min_bathrooms
-    ) and (
-        not get_size(residence)[1]
-        or get_size(residence)[1] >= residence_filter.min_size
+        (
+            not get_bathroom_count(residence)
+            or get_bathroom_count(residence) >= residence_filter.min_bathrooms
+        )
+        and (
+            not get_size(residence)[1]
+            or get_size(residence)[1] >= residence_filter.min_size
+        )
+        and (get_id(residence) not in residence_filter.exclusion_list)
     )
 
 
@@ -167,3 +179,13 @@ def get_url_path(residence: dict[any, any]):
     residence - Rightmove residence object
     """
     return residence.get("propertyUrl")
+
+
+def get_agent(residence: Residence):
+    """
+    extract residence agent publisher
+
+    Keyword arguments:
+    residence - Rightmove residence object
+    """
+    return residence.get("formattedBranchName")
