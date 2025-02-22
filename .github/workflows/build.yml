@@ -27,7 +27,7 @@ jobs:
       - name: lint
         run: poetry run pylint .
       - name: run tests
-        run: poetry run pytest --cov-report=xml --cov=awsiammapper tests
+        run: poetry run pytest --cov-report=xml --cov=flat_search tests
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
