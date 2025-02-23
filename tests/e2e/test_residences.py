@@ -17,11 +17,12 @@ def test_get_residences():
     """test with minimal level filters"""
 
     residences_filter = ResidentFilter(
-        locationIdentifier="POSTCODE^623743",
-        min_bedrooms=0,
+        location_identifier="POSTCODE^623743",
+        min_bedrooms=1,
         min_price=0,
+        max_price=1000000,
         residence_type="flat",
-        radius=0,
+        radius=0.5,
         min_bathrooms=0,
         min_size=0,
         exclusion_list=[],
@@ -35,9 +36,10 @@ def test_get_residences_filter():
     """test with stricter filters"""
 
     residences_filter = ResidentFilter(
-        locationIdentifier="POSTCODE^623743",
+        location_identifier="POSTCODE^623743",
         min_bedrooms=2,
         min_price=400000,
+        max_price=500000,
         residence_type="flat",
         radius=0.25,
         min_bathrooms=2,
@@ -54,10 +56,15 @@ def test_get_residences_filter():
 
     result = []
     for residence in get_residences(residence_filter=residences_filter):
+        cost_per_size = (
+            {get_price(residence)[1] / get_size(residence)[1]}
+            if get_size(residence)[1]
+            else None
+        )
         result.append(
-            f"{get_id(residence)}, {get_size(residence)}, {get_price(residence)}, \
-                {get_bathroom_count(residence)}, {get_bedroom_count(residence)}, \
-                    https://www.rightmove.co.uk{get_url_path(residence)}, {get_agent(residence)}\n"
+            f"{get_id(residence)}, {get_size(residence)[1]}, {get_price(residence)[1]}, "
+            + f"{cost_per_size}, {get_bathroom_count(residence)}, {get_bedroom_count(residence)}, "
+            + f"https://www.rightmove.co.uk{get_url_path(residence)}, {get_agent(residence)}"
         )
 
     assert True

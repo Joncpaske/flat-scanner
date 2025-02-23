@@ -24,6 +24,7 @@ def build_filter(
     location_identifier=None,
     min_bedrooms=None,
     min_price=None,
+    max_price=None,
     residence_type=None,
     radius=None,
     min_bathrooms=None,
@@ -32,11 +33,12 @@ def build_filter(
 ):  # pylint: disable=too-many-arguments,too-many-positional-arguments
     """default filter object for testing support with overrides"""
     return ResidentFilter(
-        locationIdentifier=(
+        location_identifier=(
             "POSTCODE^623743" if not location_identifier else location_identifier
         ),
         min_bedrooms=0 if not min_bedrooms else min_bedrooms,
         min_price=0 if not min_price else min_price,
+        max_price=9999999 if not max_price else max_price,
         residence_type="flat" if not residence_type else residence_type,
         radius=0 if not radius else radius,
         min_bathrooms=0 if not min_bathrooms else min_bathrooms,
