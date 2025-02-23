@@ -66,9 +66,10 @@ def test_get_resedences_with_filter(monkeypatch, right_move_page):
     ]
 
     search_filter = ResidentFilter(
-        locationIdentifier="POSTCODE^623999",
+        location_identifier="POSTCODE^623999",
         min_bedrooms=2,
         min_price=0,
+        max_price=1000000,
         residence_type="flat",
         radius=0.25,
         min_bathrooms=0,
@@ -106,9 +107,10 @@ def test_exclude_list(monkeypatch, right_move_page):
     """test exluding residence by id"""
 
     search_filter = ResidentFilter(
-        locationIdentifier="POSTCODE^623999",
+        location_identifier="POSTCODE^623999",
         min_bedrooms=2,
         min_price=0,
+        max_price=1000000,
         residence_type="flat",
         radius=0.25,
         min_bathrooms=0,

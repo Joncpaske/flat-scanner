@@ -1,7 +1,7 @@
 """residence module - retrieves residence objects from a rightmove search"""
 
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Iterable, Literal
 
 import requests
@@ -19,9 +19,10 @@ RIGHT_MOVE_URL = "https://www.rightmove.co.uk/property-for-sale/find.html"
 class ResidentFilter:  # pylint: disable=too-many-instance-attributes
     """Rightmove filter options including client side filters"""
 
-    locationIdentifier: str  # pylint: disable=invalid-name
+    location_identifier: str  # pylint: disable=invalid-name
     min_bedrooms: int
     min_price: int
+    max_price: int
     residence_type: PropertyType
     radius: float
     min_bathrooms: int
@@ -39,7 +40,7 @@ def get_residences(
     residence_filter - filter applied to search results server and client side
     """
 
-    params = _get_server_params(residence_filter)
+    params = _get_server_filter(residence_filter)
     params["index"] = 0
 
     ids = set()
@@ -87,20 +88,19 @@ def _valid_residence(residence: dict[any, any], residence_filter: ResidentFilter
     )
 
 
-def _get_server_params(residence_filter: ResidentFilter = None) -> dict[str, str]:
-    server_filters = [
-        "locationIdentifier",
-        "min_bedrooms",
-        "min_price",
-        "residence_type",
-        "radius",
-    ]
-
-    return {
-        key: val
-        for key, val in (asdict(residence_filter).items() if residence_filter else [])
-        if key in server_filters
-    }
+def _get_server_filter(residence_filter: ResidentFilter = None) -> dict[str, str]:
+    return (
+        {
+            "locationIdentifier": residence_filter.location_identifier,
+            "minPrice": residence_filter.min_price,
+            "maxPrice": residence_filter.max_price,
+            "propertyTypes": residence_filter.residence_type,
+            "radius": residence_filter.radius,
+            "minBedroom": residence_filter.min_bedrooms,
+        }
+        if residence_filter
+        else {}
+    )
 
 
 def get_bathroom_count(residence: dict[any, any]) -> int:
